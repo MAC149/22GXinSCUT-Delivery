@@ -152,13 +152,7 @@ void Motortot::Motortot_RotRight(int delayms)
             delayMicroseconds(delayms);
         }
     }
-
-    void Motortot::Motortot_SetDir(bool FL,bool FR,bool BL,bool BR)
-    {
-        this->Motortot_SetDir(FL,FR,BL,BR);
-        this->Motortot_En(1);
-    }
-    
+        
     void Motortot::Motortot_SetDirForward()
     {
         this->Motortot_SetDir(0,1,0,1);
