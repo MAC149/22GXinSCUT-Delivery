@@ -1,5 +1,6 @@
 #include"Motortot.h"
 
+extern bool Break_Flag;
 void Motortot::Motortot_Init()
 {
     this->MotorFL->Motor_Init();
@@ -152,48 +153,48 @@ void Motortot::Motortot_RotRight(int delayms)
             delayMicroseconds(delayms);
         }
     }
-        
+
     void Motortot::Motortot_SetDirForward()
-    {
+{
+    this->Motortot_SetDir(0,1,0,1);
+    this->Motortot_En(1);
+}
+
+void Motortot::Motortot_SetDirBackward()
+{
+    this->Motortot_SetDir(1,0,1,0);
+    this->Motortot_En(1);
+}
+
+void Motortot::Motortot_SetDirLeft()
+{
+    this->Motortot_SetDir(1,1,0,0);
+    this->Motortot_En(1);
+}
+
+void Motortot::Motortot_SetDirRight()
+{
+    this->Motortot_SetDir(0,0,1,1);
+    this->Motortot_En(1);
+}
+
+void Motortot::Motortot_SetDirForLeft()
+{
         this->Motortot_SetDir(0,1,0,1);
         this->Motortot_En(1);
-    }
+}
     
-    void Motortot::Motortot_SetDirBackward()
-    {
-        this->Motortot_SetDir(1,0,1,0);
-        this->Motortot_En(1);
-    }
-    
-    void Motortot::Motortot_SetDirLeft()
-    {
-        this->Motortot_SetDir(1,1,0,0);
-        this->Motortot_En(1);
-    }
-    
-    void Motortot::Motortot_SetDirRight()
-    {
-        this->Motortot_SetDir(0,0,1,1);
-        this->Motortot_En(1);
-    }
-    
-    void Motortot::Motortot_SetDirForLeft()
-    {
+void Motortot::Motortot_SetDirForRight()
+{
         this->Motortot_SetDir(0,1,0,1);
         this->Motortot_En(1);
-    }
-    
-    void Motortot::Motortot_SetDirForRight()
-    {
-         this->Motortot_SetDir(0,1,0,1);
-         this->Motortot_En(1);
-    }
-    
-    void Motortot::Motortot_Steprun(int delayms)
-    {
+}
+
+void Motortot::Motortot_Steprun(int delayms)
+{
         MotorFL->Motor_StpRun();
         MotorFR->Motor_StpRun();
         MotorBL->Motor_StpRun();
         MotorBR->Motor_StpRun();
         delayMicroseconds(delayms);
-    }
+}
