@@ -27,19 +27,6 @@ void MotorTestDemo()
     delay(2000);
 }
 
-
-bool CheckRes(Dirc checkdir)
-{
-    switch(checkdir)
-    {
-        case L:return (bool)(digitalRead(HT[2]||digitalRead(HT[3])));break;
-        case R:return (bool)(digitalRead(HT[4]||digitalRead(HT[5])));break;
-        case F:return (bool)(digitalRead(HT[0]||digitalRead(HT[1])));break;
-        case B:return (bool)(digitalRead(HT[6]||digitalRead(HT[7])));break;
-    }
-}
-
-
 int CheckResSim(Dirc checkdir)
 {
     switch(checkdir)
@@ -64,7 +51,7 @@ int CheckResSim2(Dirc checkdir)
 
 void Stright_Fix(Dirc godir,Dirc checkdir,int delayms)
 {
-    check=150;
+    check=0;
     switch(godir)
     {
         case B:break;
@@ -128,7 +115,6 @@ void Line_Plus(Dirc godir,Dirc checkdir,int delayms)
 {
     check=0;
     LinePassBreak=0;
-    Stright_Fix(godir,checkdir,500);
     do
     {
          if(!(check%=240))
@@ -165,6 +151,10 @@ void Goline(u8 Lineobj,Dirc godir,Dirc checkdir,int delayms)
     {
         if(!(check%=240))
         {
+            if((CheckResSim2(godir)||CheckResSim(godir)))
+            {
+                Stright_Fix(godir,checkdir,500);
+            }
             if (CheckResSim2(checkdir)||CheckResSim(checkdir))
             {
                 Line_Plus(godir,checkdir,delayms);
