@@ -31,4 +31,8 @@ public:
     void Motortot_SetDirForLeft();
     void Motortot_SetDirForRight();
     void Motortot_Steprun(int delayms);
+    void Motortot_ForLeftSteprun(int delayms);
+    void Motortot_ForRightSteprun(int delayms);
+    void Motortot_SetDirRotLeft();
+    void Motortot_SetDirRotRight();
 };

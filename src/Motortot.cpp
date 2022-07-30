@@ -180,21 +180,47 @@ void Motortot::Motortot_SetDirRight()
 
 void Motortot::Motortot_SetDirForLeft()
 {
-        this->Motortot_SetDir(0,1,0,1);
-        this->Motortot_En(1);
+    this->Motortot_SetDir(0,1,0,1);
+    this->Motortot_En(1);
 }
     
 void Motortot::Motortot_SetDirForRight()
 {
-        this->Motortot_SetDir(0,1,0,1);
-        this->Motortot_En(1);
+    this->Motortot_SetDir(0,1,0,1);
+    this->Motortot_En(1);
 }
 
 void Motortot::Motortot_Steprun(int delayms)
 {
-        MotorFL->Motor_StpRun();
-        MotorFR->Motor_StpRun();
-        MotorBL->Motor_StpRun();
-        MotorBR->Motor_StpRun();
-        delayMicroseconds(delayms);
+    MotorFL->Motor_StpRun();
+    MotorFR->Motor_StpRun();
+    MotorBL->Motor_StpRun();
+    MotorBR->Motor_StpRun();
+    delayMicroseconds(delayms);
+}
+
+void Motortot::Motortot_ForLeftSteprun(int delayms)
+{
+    MotorFL->Motor_StpRun();
+    MotorBR->Motor_StpRun();
+    delayMicroseconds(delayms);
+}
+
+void  Motortot::Motortot_ForRightSteprun(int delayms)
+{
+    MotorFR->Motor_StpRun();
+    MotorBL->Motor_StpRun();
+    delayMicroseconds(delayms);
+}
+
+void Motortot::Motortot_SetDirRotLeft()
+{
+    this->Motortot_SetDir(1,1,1,1);
+    this->Motortot_En(1);
+}
+
+void Motortot::Motortot_SetDirRotRight()
+{
+    this->Motortot_SetDir(0,0,0,0);
+    this->Motortot_En(1);
 }

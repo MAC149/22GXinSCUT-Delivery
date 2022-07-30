@@ -1,14 +1,13 @@
 #include"step.h"
 #include<MsTimer2.h>
-const int INTERVAL = 100;
 Motortot Mtot1(2,A0,4,8,5,9,6,10,7,11);
 bool Break_Flag = 0;
 bool LinePassBreak=0;
-u8 LineStats=0;
+bool AdjustBreak=0;
 int HT[8]={31,33,35,37,39,41,43,45};
 String QRCode="";
 int line=0,check=0;
-enum Dirc{F=1,B,L,R,LR};
+enum Dirc{F=1,B,L,R};
 
 void MotorTestDemo()
 {
@@ -29,56 +28,90 @@ void MotorTestDemo()
 }
 
 
-int CheckRes(Dirc checkdir)
+bool CheckRes(Dirc checkdir)
 {
     switch(checkdir)
     {
-        case L:return (digitalRead(HT[2]||digitalRead(HT[3])));break;
-        case R:return (digitalRead(HT[4]||digitalRead(HT[5])));break;
-        case F:return (digitalRead(HT[0]||digitalRead(HT[1])));break;
-        case B:return (digitalRead(HT[6]||digitalRead(HT[7])));break;
-        case LR:return (digitalRead(HT[2]||digitalRead(HT[3])||digitalRead(HT[4]||digitalRead(HT[5]))));break;
-    }
-}
-
-void TimerCheck(Dirc checkdir)
-{
-    switch (LineStats)
-    {
-    case 0:if(CheckRes(checkdir)){LineStats=1;}break;
-    case 1:if(!CheckRes(checkdir)){LineStats=2;}break;
+        case L:return (bool)(digitalRead(HT[2]||digitalRead(HT[3])));break;
+        case R:return (bool)(digitalRead(HT[4]||digitalRead(HT[5])));break;
+        case F:return (bool)(digitalRead(HT[0]||digitalRead(HT[1])));break;
+        case B:return (bool)(digitalRead(HT[6]||digitalRead(HT[7])));break;
     }
 }
 
 
-void Stright_Adjust()
+int CheckResSim(Dirc checkdir)
 {
-
+    switch(checkdir)
+    {
+        case L:return (digitalRead(HT[2]));break;
+        case R:return (digitalRead(HT[4]));break;
+        case F:return (digitalRead(HT[0]));break;
+        case B:return (digitalRead(HT[6]));break;
+    }
 }
 
-void Line_Plus(Dirc checkdir,int delayms)
+int CheckResSim2(Dirc checkdir)
 {
-    LinePassBreak=0;
-    do
+    switch(checkdir)
     {
-         if(!(check%=20))
-        {
-            if (!CheckRes(checkdir))
+        case L:return (digitalRead(HT[3]));break;
+        case R:return (digitalRead(HT[5]));break;
+        case F:return (digitalRead(HT[1]));break;
+        case B:return (digitalRead(HT[7]));break;
+    }
+}
+
+void Stright_Fix(Dirc godir,Dirc checkdir,int delayms)
+{
+    check=150;
+    switch(godir)
+    {
+        case B:break;
+        case R:
+         do
             {
-                    LinePassBreak=1;
-            }
-        }
-        Mtot1.Motortot_Steprun(delayms);
-    } while(!LinePassBreak);
-    LinePassBreak=0;
-    line++;
-}
-
-
-void Goline(u8 Lineobj,Dirc godir,Dirc checkdir,int delayms)
-{
-    Break_Flag=0;
-    line=0;
+                if(!(check%=150))
+                {
+                    if ((CheckResSim2(godir)&&CheckResSim(godir)))
+                    {
+                        AdjustBreak=1;
+                    }
+                    else if(CheckResSim2(godir)&&(!CheckResSim(godir)))
+                    {
+                    Mtot1.Motortot_SetDirRotLeft();
+                    }
+                    else if(CheckResSim(godir)&&(!CheckResSim2(godir)))
+                    {
+                        Mtot1.Motortot_SetDirRotRight();
+                    }
+                }
+            Mtot1.Motortot_Steprun(delayms);
+            check++;
+        } while(!AdjustBreak);break;
+        case L:
+        case F:
+             do
+            {
+                if(!(check%=150))
+                {
+                    if ((CheckResSim2(godir)&&CheckResSim(godir)))
+                    {
+                        AdjustBreak=1;
+                    }
+                    else if(CheckResSim2(godir)&&(!CheckResSim(godir)))
+                    {
+                    Mtot1.Motortot_SetDirRotLeft();
+                    }
+                    else if(CheckResSim(godir)&&(!CheckResSim2(godir)))
+                    {
+                        Mtot1.Motortot_SetDirRotRight();
+                    }
+                }
+            Mtot1.Motortot_Steprun(delayms);
+            check++;
+        } while(!AdjustBreak);break;
+    }
     switch (godir)
     {
     case F:Mtot1.Motortot_SetDirForward();break;
@@ -86,13 +119,55 @@ void Goline(u8 Lineobj,Dirc godir,Dirc checkdir,int delayms)
     case L:Mtot1.Motortot_SetDirLeft();break;
     case R:Mtot1.Motortot_SetDirRight();break;
     }
+    AdjustBreak=0;
+    check=0;
+}
+
+
+void Line_Plus(Dirc godir,Dirc checkdir,int delayms)
+{
+    check=0;
+    LinePassBreak=0;
+    Stright_Fix(godir,checkdir,500);
     do
     {
-        if(!(check%=20))
+         if(!(check%=240))
         {
-            if (CheckRes(checkdir))
+            if (!(CheckResSim2(checkdir)||CheckResSim(checkdir)))
             {
-                Line_Plus(checkdir,delayms);
+                LinePassBreak=1;
+            }
+        }
+        Mtot1.Motortot_Steprun(delayms);
+        check++;
+    } while(!LinePassBreak);
+    LinePassBreak=0;
+    line++;
+    check=0;
+}
+
+
+void Goline(u8 Lineobj,Dirc godir,Dirc checkdir,int delayms)
+{
+    Break_Flag=0;
+    check=0;
+    line=0;
+    //Mtot1.Motortot_Reset();
+    switch (godir)
+    {
+    case F:Mtot1.Motortot_SetDirForward();break;
+    case B:Mtot1.Motortot_SetDirBackward();break;
+    case L:Mtot1.Motortot_SetDirLeft();break;
+    case R:Mtot1.Motortot_SetDirRight();break;
+    }
+    delay(100);
+    do
+    {
+        if(!(check%=240))
+        {
+            if (CheckResSim2(checkdir)||CheckResSim(checkdir))
+            {
+                Line_Plus(godir,checkdir,delayms);
                 if(line==Lineobj)
                 {
                     Break_Flag=1;
@@ -104,11 +179,13 @@ void Goline(u8 Lineobj,Dirc godir,Dirc checkdir,int delayms)
     } while (!Break_Flag);
     Break_Flag=0;
     line=0;
+    check=0;
 }
 
 void runtest()
 {   
     Mtot1.Motortot_ForwardR(100,1);
+    delay(100);
     Mtot1.Motortot_LeftR(100,1);    
     Goline(1,L,L,100);
     Goline(2,F,F,100);
@@ -116,31 +193,38 @@ void runtest()
     {
         QRCode=QR_Getstring(&Serial);
     }while(QRCode=="");*/
-    delay(2000);//起点-扫码
-    Goline(2,F,LR,100);
+    delay(1000);//起点-扫码
+    Goline(4,F,R,100);
     Goline(1,R,R,100);
-    delay(2000);//扫码-原料区
+    delay(1000);//扫码-原料区
     Mtot1.Motortot_RotLeft(100);
-    Goline(2,F,R,100);
-    delay(2000);//原料-粗加工区
+    Goline(3,F,R,100);
+    Goline(1,R,R,100);
+    delay(1000);//原料-粗加工区
     Goline(2,F,F,100);
+    delay(100);
     Mtot1.Motortot_RotLeft(100);
+    Goline(3,F,L,100);
+    Goline(1,R,L,100);
+    delay(1000);//粗加工-精加工
+    Goline(1,L,R,100);
+    delay(100);
+    Mtot1.Motortot_RotLeft(100);
+    Mtot1.Motortot_RotLeft(100);
+    Goline(5,R,R,100);
+    Goline(2,F,L,100);
+    //Goline(1,R,R,100);
+    delay(1000);//精加工-原料二轮
+    Mtot1.Motortot_RotLeft(100);
+    Goline(3,F,R,100);
+    delay(1000);//原料-粗加工
     Goline(2,F,F,100);
-    delay(2000);//粗加工-精加工
+    delay(100);
     Mtot1.Motortot_RotLeft(100);
-    Mtot1.Motortot_RotLeft(100);
-    Goline(5,R,L,100);
-    Goline(2,F,R,100);
-    delay(2000);//精加工-原料二轮
-    Mtot1.Motortot_RotLeft(100);
-    Goline(2,F,R,100);
-    delay(2000);//原料-粗加工
-    Goline(2,F,F,100);
-    Mtot1.Motortot_RotLeft(100);
-    Goline(2,F,F,100);
-    delay(2000);//粗加工-精加工
+    Goline(3,F,L,100);
+    Goline(1,R,L,100);
+    delay(1000);//粗加工-精加工
     Mtot1.Motortot_ForwardR(100,2);
-
 }
 
 void stp1()
