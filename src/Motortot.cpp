@@ -41,10 +41,10 @@ void Motortot::Motortot_SetDir(bool FL,bool FR,bool BL,bool BR)
     this->MotorBR->Motor_SetDir(BR);
 }  
 
-void Motortot::Motortot_Forward(int delayms,int round)
+void Motortot::Motortot_ForwardR(int delayms,int round)
 {
     this->Motortot_SetDir(0,1,0,1);
-    Motortot_En(1);
+    this->Motortot_En(1);
     for(int i=0;i<6400*round;i++)
     {
         MotorFL->Motor_StpRun();
@@ -55,10 +55,10 @@ void Motortot::Motortot_Forward(int delayms,int round)
     }
 }
 
-void Motortot::Motortot_Backward(int delayms,int round)
+void Motortot::Motortot_BackwardR(int delayms,int round)
 {
     this->Motortot_SetDir(1,0,1,0);
-    Motortot_En(1);
+    this->Motortot_En(1);
     for(int i=0;i<6400*round;i++)
     {
         MotorFL->Motor_StpRun();
@@ -69,10 +69,10 @@ void Motortot::Motortot_Backward(int delayms,int round)
     }
 }
 
-void Motortot::Motortot_Left(int delayms,int round)
+void Motortot::Motortot_LeftR(int delayms,int round)
 {
     this->Motortot_SetDir(1,1,0,0);
-    Motortot_En(1);
+    this->Motortot_En(1);
     for(int i=0;i<6400*round;i++)
     {
         MotorFL->Motor_StpRun();
@@ -83,10 +83,10 @@ void Motortot::Motortot_Left(int delayms,int round)
     }
 }
 
-void Motortot::Motortot_Right(int delayms,int round)
+void Motortot::Motortot_RightR(int delayms,int round)
 {
     this->Motortot_SetDir(0,0,1,1);
-    Motortot_En(1);
+    this->Motortot_En(1);
     for(int i=0;i<6400*round;i++)
     {
         MotorFL->Motor_StpRun();
@@ -100,7 +100,7 @@ void Motortot::Motortot_Right(int delayms,int round)
 void Motortot::Motortot_RotLeft(int delayms)
 {
     this->Motortot_SetDir(1,1,1,1);
-    Motortot_En(1);
+    this->Motortot_En(1);
     for(int i=0;i<=8000;i++)
     {
         MotorFL->Motor_StpRun();
@@ -114,7 +114,7 @@ void Motortot::Motortot_RotLeft(int delayms)
 void Motortot::Motortot_RotRight(int delayms)
 {
     this->Motortot_SetDir(0,0,0,0);
-    Motortot_En(1);
+    this->Motortot_En(1);
     for(int i=0;i<=8000;i++)
     {
         MotorFL->Motor_StpRun();
@@ -125,10 +125,10 @@ void Motortot::Motortot_RotRight(int delayms)
     }
 }
 
-    void Motortot::Motortot_ForLeft(int delayms,int round)
+    void Motortot::Motortot_ForLeftR(int delayms,int round)
     {
         this->Motortot_SetDir(0,1,0,1);
-        Motortot_En(1);
+        this->Motortot_En(1);
         for(int i=0;i<6400*round;i++)
         {
             MotorFL->Motor_StpRun();
@@ -139,10 +139,10 @@ void Motortot::Motortot_RotRight(int delayms)
         }
     }
     
-    void Motortot::Motortot_ForRight(int delayms,int round)
+    void Motortot::Motortot_ForRightR(int delayms,int round)
     {
         this->Motortot_SetDir(0,1,0,1);
-        Motortot_En(1);
+        this->Motortot_En(1);
         for(int i=0;i<6400*round;i++)
         {
             //MotorFL->Motor_StpRun();
@@ -151,4 +151,55 @@ void Motortot::Motortot_RotRight(int delayms)
             //MotorBR->Motor_StpRun();
             delayMicroseconds(delayms);
         }
+    }
+
+    void Motortot::Motortot_SetDir(bool FL,bool FR,bool BL,bool BR)
+    {
+        this->Motortot_SetDir(FL,FR,BL,BR);
+        this->Motortot_En(1);
+    }
+    
+    void Motortot::Motortot_SetDirForward()
+    {
+        this->Motortot_SetDir(0,1,0,1);
+        this->Motortot_En(1);
+    }
+    
+    void Motortot::Motortot_SetDirBackward()
+    {
+        this->Motortot_SetDir(1,0,1,0);
+        this->Motortot_En(1);
+    }
+    
+    void Motortot::Motortot_SetDirLeft()
+    {
+        this->Motortot_SetDir(1,1,0,0);
+        this->Motortot_En(1);
+    }
+    
+    void Motortot::Motortot_SetDirRight()
+    {
+        this->Motortot_SetDir(0,0,1,1);
+        this->Motortot_En(1);
+    }
+    
+    void Motortot::Motortot_SetDirForLeft()
+    {
+        this->Motortot_SetDir(0,1,0,1);
+        this->Motortot_En(1);
+    }
+    
+    void Motortot::Motortot_SetDirForRight()
+    {
+         this->Motortot_SetDir(0,1,0,1);
+         this->Motortot_En(1);
+    }
+    
+    void Motortot::Motortot_Steprun(int delayms)
+    {
+        MotorFL->Motor_StpRun();
+        MotorFR->Motor_StpRun();
+        MotorBL->Motor_StpRun();
+        MotorBR->Motor_StpRun();
+        delayMicroseconds(delayms);
     }
