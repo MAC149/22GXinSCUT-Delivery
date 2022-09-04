@@ -113,13 +113,12 @@ void Stright_Fix(Dirc godir,Dirc checkdir,int delayms)
 
 void Line_Plus(Dirc godir,Dirc checkdir,int delayms)
 {
-    check=0;
     LinePassBreak=0;
     do
     {
-         if(!(check%=240))
+         if(!(check%=100))
         {
-            if (!(CheckResSim2(checkdir)||CheckResSim(checkdir)))
+            if (!(CheckResSim(checkdir)))
             {
                 LinePassBreak=1;
             }
@@ -129,7 +128,6 @@ void Line_Plus(Dirc godir,Dirc checkdir,int delayms)
     } while(!LinePassBreak);
     LinePassBreak=0;
     line++;
-    check=0;
 }
 
 
@@ -149,13 +147,13 @@ void Goline(u8 Lineobj,Dirc godir,Dirc checkdir,int delayms)
     delay(100);
     do
     {
-        if(!(check%=240))
+        if(!(check%=200))
         {
-            if((CheckResSim2(godir)||CheckResSim(godir)))
+            /*if((CheckResSim2(godir)||CheckResSim(godir)))
             {
                 Stright_Fix(godir,checkdir,500);
-            }
-            if (CheckResSim2(checkdir)||CheckResSim(checkdir))
+            }*/
+            if (CheckResSim(checkdir))
             {
                 Line_Plus(godir,checkdir,delayms);
                 if(line==Lineobj)
@@ -202,11 +200,12 @@ void runtest()
     Mtot1.Motortot_RotLeft(100);
     Mtot1.Motortot_RotLeft(100);
     Goline(5,R,R,100);
-    Goline(2,F,L,100);
+    Goline(3,F,L,100);
     //Goline(1,R,R,100);
     delay(1000);//精加工-原料二轮
     Mtot1.Motortot_RotLeft(100);
     Goline(3,F,R,100);
+    Goline(1,R,R,100);
     delay(1000);//原料-粗加工
     Goline(2,F,F,100);
     delay(100);
@@ -214,7 +213,7 @@ void runtest()
     Goline(3,F,L,100);
     Goline(1,R,L,100);
     delay(1000);//粗加工-精加工
-    Mtot1.Motortot_ForwardR(100,2);
+    Mtot1.Motortot_ForwardR(100,4);
 }
 
 void stp1()
