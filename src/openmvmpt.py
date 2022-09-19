@@ -1,16 +1,5 @@
-# uart to arduino - By: Poao - 周二 2月 2 2021
-
-# openmv：  1）获取二维码、物料放置位置顺序，并串口输出  QRx_XXX/WLx_XXX
-#           2）解算机械臂在原料区的抓取顺序，并串口输出       CTx_XXX (X = 1,2,3)
-#      是否需要识别色环的顺序？ 即粗加工、半成品区色环的顺序，然后对应放置？
-#
-#      TIPS:  以原料区为例，有【左-1|中-2|右-3】三个位置放置有物料，对应三个动作组.
-#             而所谓抓取顺序，即为机械臂【执行抓取动作组的顺序】。
-#             如 312，即为先抓右侧、再抓左侧、最后抓中间。
-
 import sensor, image, time, math,lcd
 from pyb import Pin, Timer
-#屏幕 320*240
 height = 120
 sensor.reset()
 sensor.set_pixformat(sensor.RGB565)
@@ -25,14 +14,6 @@ green_block_x=2
 blue_block_x=3
 
 message=000
-
-
-
-
-
-
-lcd.init() # Initialize the lcd screen.
-
 
 threshold_index = 0 # 0 for red, 1 for green, 2 for blue
 
@@ -60,12 +41,6 @@ Border=0      # 下层物料放置顺序
 
 Pos1 = "000"     # 上层放置位置
 Pos2 = "000"     # 下层放置位置
-
-QRCode1 = "000"  # 二维码，原料区上层搬运顺序
-QRCode2 = "000"  # 二维码，原料区下层搬运顺序
-
-
-
 
 
 def find_min(blobs):
@@ -97,17 +72,11 @@ from pyb import UART
 uart = UART(3,9600,timeout_char = 50)   # 100 可改
 
 # 串口收发数据
-recv_data = ""     # 串口接收的数据 【 CM+QR|扫描二维码、CM+WL|
-QR_flag = 0       # 扫描二维码标志位
+recv_data = ""     # 串口接收的数据 
 WL_flag = 0       # 获取上层物料放置顺序标志位
 
 
-# 串口发送 【QR1_XXX\QR2_XXX  WL1_XXX\WL2_XXX  CT1_XXX\CT2_XXX】
-#  对应 QR|任务码  WL|物料位置  CT|机械臂抓取顺序（依据QR&WL计算）
-
-
 def Uart_recv():  # 串口接收数据
-    global QR_flag   # 将变量声明为全局变量，如此才可改变其数值
     global WL_flag
 
     if (uart.any()):   # 更新串口接收数据
@@ -117,18 +86,16 @@ def Uart_recv():  # 串口接收数据
         #uart.write(recv_data)
         if ("CM+" in recv_data) :
             print("Openmv has recved CMD data.")
-            if ("+QR" in recv_data):
-                QR_flag = 1
-                print("Ready for QRcode task !")
-
-            if ("+WL" in recv_data):
+            if ("+ST" in recv_data):
                 WL_flag = 1
-                print("Ready for WLpose task !")
+                print("Task Start!")
+
+            if ("+ED" in recv_data):
+                WL_flag = 0
+                print("Task End!")
 
 
-
-
-
+#WL_flag = 1
 # 主循环
 while(True):
     clock.tick()
@@ -137,46 +104,13 @@ while(True):
     Uart_recv() # 串口接收（接收arduino发送的指令）
 
 
-    if(QR_flag):   # QR_flag
-        # 1）进行二维码识别 放置相关函数
-        #print("Start QRcode task !")
-
-        # 放这里 放这里 放这里 放这里 放这里 放这里
-        img.lens_corr(1.8) # strength of 1.8 is good for the 2.8mm lens.
-        light = Timer(2, freq=50000).channel(1, Timer.PWM, pin=Pin("P6"))
-        light.pulse_width_percent(10) # 控制亮度 0~100##############################################
-        for code in img.find_qrcodes():
-            print(code.payload())
-            if message!=code.payload():   # MESSAGE = 0; 判断是否获取到二维码数据
-           #    message=code.payload()
-                #print("The order is:%s" %( message))
-                String=list(str(code.payload()))
-                above_order=String[0]+String[1]+String[2]
-                bottom_order=String[4]+String[5]+String[6]
-
-                # 2）当二维码识别成功后 【处理数据，发送数据】
-                uart.write("QR_"+above_order+bottom_order+"\r\n")
-                # time.sleep(50)  # 延时50ms
-                # uart.write("QR2_"+bottom_order+"\r\n")
-                print("QR_"+above_order+bottom_order+"\r\n")
-                # time.sleep(50)  # 延时50ms
-                #print("QR1_"+above_order)
-                #print("QR2_"+bottom_order)
-
-                # 3）复位 QR_flag
-                QR_flag = 0
-                print("QRcode task done!")
-
-        img.draw_string(0,0,str(above_order)+"\r+\r"+str(bottom_order),color=(255,0,0),scale = 7,x_spacing=-16,y_spacing=-21)
-        light.pulse_width_percent(0) # 控制亮度 0~100##############################################
-
 
     if(WL_flag): # 识别物料    WL_flag
         #uart.write("WL_"+Pos1+Pos2+"\r\n")
 
         clock.tick()
-        light = Timer(2, freq=50000).channel(1, Timer.PWM, pin=Pin("P6"))
-        light.pulse_width_percent(100) # 控制亮度 0~100
+        #light = Timer(2, freq=50000).channel(1, Timer.PWM, pin=Pin("P6"))
+        #light.pulse_width_percent(100) # 控制亮度 0~100
         img = sensor.snapshot()
         for r in img.find_blobs([thresholds[0]],roi=[0,140,320,100],pixels_threshold=200, area_threshold=200, merge=True):
             # These values depend on the blob not being circular - otherwise they will be shaky.
@@ -188,7 +122,6 @@ while(True):
             img.draw_keypoints([(r.cx(), r.cy(), int(math.degrees(r.rotation())))], size=20)
         #print(clock.fps())
             red_block_x = r.cx()
-
         for g in img.find_blobs([thresholds[1]],roi=[0,140,320,100], pixels_threshold=200, area_threshold=200, merge=True):
             # These values depend on the blob not being circular - otherwise they will be shaky.
 
@@ -344,9 +277,7 @@ while(True):
                     uart.write("WL_"+Pos1+Pos2+"\r\n")
                     WL_flag = 0;
                     print("Done! ")
-                    light.pulse_width_percent(0)
 
-#######出现问题（1）：312+213
 
 
 
