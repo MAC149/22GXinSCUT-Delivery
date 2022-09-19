@@ -7,18 +7,14 @@ void Motortot::Motortot_Init()
     this->MotorFR->Motor_Init();
     this->MotorBL->Motor_Init();
     this->MotorBR->Motor_Init();
-    pinMode(this->Motortot_ADC, INPUT);
-    pinMode(this->Motortot_ST, OUTPUT);
 }
 
-Motortot::Motortot(int ST,int ADCPin,int Astp,int Adir,int Bstp,int Bdir,int Cstp,int Cdir,int Dstp,int Ddir)
+Motortot::Motortot(int AEn,int Astp,int Adir,int Bstp,int BEn,int Bdir,int CEn,int Cstp,int Cdir,int DEn,int Dstp,int Ddir)
 {
-    this->Motortot_ST=ST;
-    this->Motortot_ADC=ADCPin;
-    this->MotorFL = new Motor(Astp, Adir);
-    this->MotorFR = new Motor(Bstp, Bdir);
-    this->MotorBL = new Motor(Cstp, Cdir);
-    this->MotorBR = new Motor(Dstp, Ddir);
+    this->MotorFL = new Motor(AEn,Astp, Adir);
+    this->MotorFR = new Motor(BEn,Bstp, Bdir);
+    this->MotorBL = new Motor(CEn,Cstp, Cdir);
+    this->MotorBR = new Motor(DEn,Dstp, Ddir);
 }
 
 void Motortot::Motortot_Reset()
@@ -31,7 +27,10 @@ void Motortot::Motortot_Reset()
 
  void Motortot::Motortot_En(bool stats)
  {
-    digitalWrite(this->Motortot_ST,(int)stats);
+    digitalWrite(this->MotorFR->Motor_EnPin,(int)stats);
+    digitalWrite(this->MotorFL->Motor_EnPin,(int)stats);
+    digitalWrite(this->MotorBR->Motor_EnPin,(int)stats);
+    digitalWrite(this->MotorBL->Motor_EnPin,(int)stats);
  }
 
 void Motortot::Motortot_SetDir(bool FL,bool FR,bool BL,bool BR)
@@ -197,6 +196,18 @@ void Motortot::Motortot_Steprun(int delayms)
     MotorBL->Motor_StpRun();
     MotorBR->Motor_StpRun();
     delayMicroseconds(delayms);
+}
+
+void Motortot::Motortot_SteprunRAW(int delayms,int time)
+{
+    for(int i=0;i<time;i++)
+    {
+        MotorFL->Motor_StpRun();
+        MotorFR->Motor_StpRun();
+        MotorBL->Motor_StpRun();
+        MotorBR->Motor_StpRun();
+        delayMicroseconds(delayms);
+    }
 }
 
 void Motortot::Motortot_ForLeftSteprun(int delayms)

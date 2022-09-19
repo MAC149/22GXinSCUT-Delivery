@@ -4,4 +4,4 @@
 #include"QRScanner.h"
 void runtest();
 void stp1();
-void runtestv2();
+void runtest1();

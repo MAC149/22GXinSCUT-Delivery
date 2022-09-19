@@ -1,6 +1,6 @@
 #include"step.h"
 #include<MsTimer2.h>
-Motortot Mtot1(2,A0,4,8,5,9,6,10,7,11);
+Motortot Mtot1(4,3,2,10,9,8,13,12,11,7,6,5);//AEn,Astp,Adir,Bstp,BEn,Bdir,CEn,Cstp,Cdir,DEn,Dstp,Ddir
 bool Break_Flag = 0;
 bool LinePassBreak=0;
 bool AdjustBreak=0;
@@ -216,7 +216,7 @@ void runtest()
     Mtot1.Motortot_ForwardR(100,4);
 }
 
-void stp1()
+void runtest1()
 {
     
 }

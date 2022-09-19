@@ -5,7 +5,7 @@
 class Motortot
 {
 public:
-    Motortot(int ST,int ADCPin,int Astp,int Adir,int Bstp,int Bdir,int Cstp,int Cdir,int Dstp,int Ddir);
+    Motortot(int AEn,int Astp,int Adir,int Bstp,int BEn,int Bdir,int CEn,int Cstp,int Cdir,int DEn,int Dstp,int Ddir);
     int Motortot_ST;
     Motor* MotorFL;
     Motor* MotorFR;
@@ -31,6 +31,7 @@ public:
     void Motortot_SetDirForLeft();
     void Motortot_SetDirForRight();
     void Motortot_Steprun(int delayms);
+    void Motortot_SteprunRAW(int delayms,int time);
     void Motortot_ForLeftSteprun(int delayms);
     void Motortot_ForRightSteprun(int delayms);
     void Motortot_SetDirRotLeft();
