@@ -1,6 +1,5 @@
 #include"Motortot.h"
 
-extern bool Break_Flag;
 void Motortot::Motortot_Init()
 {
     this->MotorFL->Motor_Init();

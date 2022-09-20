@@ -1,13 +1,151 @@
 #include"step.h"
-#include<MsTimer2.h>
 Motortot Mtot1(4,3,2,10,9,8,13,12,11,7,6,5);//AEn,Astp,Adir,Bstp,BEn,Bdir,CEn,Cstp,Cdir,DEn,Dstp,Ddir
 bool Break_Flag = 0;
 bool LinePassBreak=0;
-bool AdjustBreak=0;
-int HT[8]={31,33,35,37,39,41,43,45};
 String QRCode="";
 int line=0,check=0;
 enum Dirc{F=1,B,L,R};
+int HT[2]={1,2};
+
+void uart_Init()
+ {
+   Serial3.begin(9600);  
+ }
+ 
+unsigned int Temp[2] = { 0 };
+unsigned int Temp1[2] = { 0 };
+
+void Read_Data(unsigned int *Data)         
+{ 
+  unsigned char y = 0;
+  unsigned char USART_RX_STA[3] = { 0 };       //数据缓存区
+  unsigned char Num = 0;              //数组计数
+  unsigned int Receive_data = 0;       //数据缓存区
+  
+  Serial3.write(0x57);
+ ///////////////////////////数字量数值///////////////////////////////  
+ 
+  for(y=0;y <= 5;y++)
+  {
+    delay(1);
+    if(Serial3.available() > 0)
+    {
+      USART_RX_STA[Num++] = Serial3.read(); //依次读取接收到的数据
+      if(Num == 1)
+      {
+        Num = 0;
+        *Data = USART_RX_STA[0];
+        break;
+      }
+    } 
+  }
+} 
+
+void Follow()
+{
+    Read_Data(Temp1);
+    switch(Temp1[0])
+    {                                     
+        case 0xF7:     Mtot1.Motortot_SetDirRotLeft(); delay(30);Mtot1.Motortot_SteprunRAW(10,30); break;      //1111 0111
+        case 0xE7:     Mtot1.Motortot_SetDirForward();delay(30); Mtot1.Motortot_SteprunRAW(10,10); break;      //1110 0111   //正中间的位置
+        case 0xEF:     Mtot1.Motortot_SetDirRotRight(); delay(30);Mtot1.Motortot_SteprunRAW(10,30);break;       //1110 1111
+        case 0x00:     Mtot1.Motortot_Reset();break;
+        default :         Mtot1.Motortot_SetDirForward();delay(30); Mtot1.Motortot_SteprunRAW(10,10); break;  
+    }
+}
+
+
+
+void FindMid_Left()
+{
+  Mtot1.Motortot_SetDirLeft();
+  do
+  {
+    Read_Data(Temp);
+    Mtot1.Motortot_Steprun(100);
+  }
+  while(Temp[0]!=0xF7);  
+}
+
+void FindMid_Right()
+{
+  Mtot1.Motortot_SetDirRight();
+  do
+  {
+    Read_Data(Temp);
+    Mtot1.Motortot_Steprun(100);
+  }
+  while(Temp[0]!=0xF7);  
+}
+
+bool NLine_Status()
+{
+  Read_Data(Temp);
+  u8 count=0;
+  for(u8 i=0x01;i<<1;i<0x80)
+  {
+    if(1==Temp[0]&i)
+    {
+      count++;
+    }
+  }
+  if(count>=4)
+  {
+    count=0;
+    return 1;
+  }
+  else
+  {
+    count=0;
+    return 0;
+  }
+}
+
+void NLine_Plus(int delayms)
+{
+  bool LinePassBreak=0;
+    do
+    {
+        if(!(check%=100))
+        {
+            if (!(NLine_Status()))
+            {
+                LinePassBreak=1;
+            }
+        }
+        Mtot1.Motortot_Steprun(delayms);
+        check++;
+    }while (!LinePassBreak);
+  LinePassBreak=0;
+line++;
+}
+  
+void NGoline(u8 Lineobj,int delayms)
+{
+    Break_Flag=0;
+    check=0;
+    line=0;
+    //Mtot1.Motortot_Reset();
+    do
+    {
+        if(!(check%=200))
+        {
+            if (NLine_Status())
+            {
+                NLine_Plus(delayms);
+                if(line==Lineobj)
+                {
+                    Break_Flag=1;
+                }
+            }
+        }
+        Mtot1.Motortot_Steprun(delayms);
+        check++;
+    } while (!Break_Flag);
+    Break_Flag=0;
+    line=0;
+    check=0;
+}
 
 void MotorTestDemo()
 {
@@ -27,196 +165,13 @@ void MotorTestDemo()
     delay(2000);
 }
 
-int CheckResSim(Dirc checkdir)
-{
-    switch(checkdir)
-    {
-        case L:return (digitalRead(HT[2]));break;
-        case R:return (digitalRead(HT[4]));break;
-        case F:return (digitalRead(HT[0]));break;
-        case B:return (digitalRead(HT[6]));break;
-    }
-}
-
-int CheckResSim2(Dirc checkdir)
-{
-    switch(checkdir)
-    {
-        case L:return (digitalRead(HT[3]));break;
-        case R:return (digitalRead(HT[5]));break;
-        case F:return (digitalRead(HT[1]));break;
-        case B:return (digitalRead(HT[7]));break;
-    }
-}
-
-void Stright_Fix(Dirc godir,Dirc checkdir,int delayms)
-{
-    check=0;
-    switch(godir)
-    {
-        case B:break;
-        case R:
-         do
-            {
-                if(!(check%=150))
-                {
-                    if ((CheckResSim2(godir)&&CheckResSim(godir)))
-                    {
-                        AdjustBreak=1;
-                    }
-                    else if(CheckResSim2(godir)&&(!CheckResSim(godir)))
-                    {
-                    Mtot1.Motortot_SetDirRotLeft();
-                    }
-                    else if(CheckResSim(godir)&&(!CheckResSim2(godir)))
-                    {
-                        Mtot1.Motortot_SetDirRotRight();
-                    }
-                }
-            Mtot1.Motortot_Steprun(delayms);
-            check++;
-        } while(!AdjustBreak);break;
-        case L:
-        case F:
-             do
-            {
-                if(!(check%=150))
-                {
-                    if ((CheckResSim2(godir)&&CheckResSim(godir)))
-                    {
-                        AdjustBreak=1;
-                    }
-                    else if(CheckResSim2(godir)&&(!CheckResSim(godir)))
-                    {
-                    Mtot1.Motortot_SetDirRotLeft();
-                    }
-                    else if(CheckResSim(godir)&&(!CheckResSim2(godir)))
-                    {
-                        Mtot1.Motortot_SetDirRotRight();
-                    }
-                }
-            Mtot1.Motortot_Steprun(delayms);
-            check++;
-        } while(!AdjustBreak);break;
-    }
-    switch (godir)
-    {
-    case F:Mtot1.Motortot_SetDirForward();break;
-    case B:Mtot1.Motortot_SetDirBackward();break;
-    case L:Mtot1.Motortot_SetDirLeft();break;
-    case R:Mtot1.Motortot_SetDirRight();break;
-    }
-    AdjustBreak=0;
-    check=0;
-}
-
-
-void Line_Plus(Dirc godir,Dirc checkdir,int delayms)
-{
-    LinePassBreak=0;
-    do
-    {
-         if(!(check%=100))
-        {
-            if (!(CheckResSim(checkdir)))
-            {
-                LinePassBreak=1;
-            }
-        }
-        Mtot1.Motortot_Steprun(delayms);
-        check++;
-    } while(!LinePassBreak);
-    LinePassBreak=0;
-    line++;
-}
-
-
-void Goline(u8 Lineobj,Dirc godir,Dirc checkdir,int delayms)
-{
-    Break_Flag=0;
-    check=0;
-    line=0;
-    //Mtot1.Motortot_Reset();
-    switch (godir)
-    {
-    case F:Mtot1.Motortot_SetDirForward();break;
-    case B:Mtot1.Motortot_SetDirBackward();break;
-    case L:Mtot1.Motortot_SetDirLeft();break;
-    case R:Mtot1.Motortot_SetDirRight();break;
-    }
-    delay(100);
-    do
-    {
-        if(!(check%=200))
-        {
-            /*if((CheckResSim2(godir)||CheckResSim(godir)))
-            {
-                Stright_Fix(godir,checkdir,500);
-            }*/
-            if (CheckResSim(checkdir))
-            {
-                Line_Plus(godir,checkdir,delayms);
-                if(line==Lineobj)
-                {
-                    Break_Flag=1;
-                }
-            }
-        }
-        Mtot1.Motortot_Steprun(delayms);
-        check++;
-    } while (!Break_Flag);
-    Break_Flag=0;
-    line=0;
-    check=0;
-}
 
 void runtest()
 {   
     Mtot1.Motortot_ForwardR(100,1);
     delay(100);
-    Mtot1.Motortot_LeftR(100,1);    
-    Goline(1,L,L,100);
-    Goline(2,F,F,100);
-    /*do
-    {
-        QRCode=QR_Getstring(&Serial);
-    }while(QRCode=="");*/
-    delay(1000);//起点-扫码
-    Goline(4,F,R,100);
-    Goline(1,R,R,100);
-    delay(1000);//扫码-原料区
-    Mtot1.Motortot_RotLeft(100);
-    Goline(3,F,R,100);
-    Goline(1,R,R,100);
-    delay(1000);//原料-粗加工区
-    Goline(2,F,F,100);
-    delay(100);
-    Mtot1.Motortot_RotLeft(100);
-    Goline(3,F,L,100);
-    Goline(1,R,L,100);
-    delay(1000);//粗加工-精加工
-    Goline(1,L,R,100);
-    delay(100);
-    Mtot1.Motortot_RotLeft(100);
-    Mtot1.Motortot_RotLeft(100);
-    Goline(5,R,R,100);
-    Goline(3,F,L,100);
-    //Goline(1,R,R,100);
-    delay(1000);//精加工-原料二轮
-    Mtot1.Motortot_RotLeft(100);
-    Goline(3,F,R,100);
-    Goline(1,R,R,100);
-    delay(1000);//原料-粗加工
-    Goline(2,F,F,100);
-    delay(100);
-    Mtot1.Motortot_RotLeft(100);
-    Goline(3,F,L,100);
-    Goline(1,R,L,100);
-    delay(1000);//粗加工-精加工
-    Mtot1.Motortot_ForwardR(100,4);
-}
-
-void runtest1()
-{
+    Mtot1.Motortot_SetDirLeft();
+    
+    
     
 }
