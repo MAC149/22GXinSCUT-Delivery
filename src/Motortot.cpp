@@ -8,7 +8,7 @@ void Motortot::Motortot_Init()
     this->MotorBR->Motor_Init();
 }
 
-Motortot::Motortot(int AEn,int Astp,int Adir,int Bstp,int BEn,int Bdir,int CEn,int Cstp,int Cdir,int DEn,int Dstp,int Ddir)
+Motortot::Motortot(int AEn,int Astp,int Adir,int BEn,int Bstp,int Bdir,int CEn,int Cstp,int Cdir,int DEn,int Dstp,int Ddir)
 {
     this->MotorFL = new Motor(AEn,Astp, Adir);
     this->MotorFR = new Motor(BEn,Bstp, Bdir);
@@ -24,12 +24,12 @@ void Motortot::Motortot_Reset()
     MotorBR->Motor_Reset();
 }
 
- void Motortot::Motortot_En(bool stats)
+ void Motortot::Motortot_En(bool status)
  {
-    digitalWrite(this->MotorFR->Motor_EnPin,(int)stats);
-    digitalWrite(this->MotorFL->Motor_EnPin,(int)stats);
-    digitalWrite(this->MotorBR->Motor_EnPin,(int)stats);
-    digitalWrite(this->MotorBL->Motor_EnPin,(int)stats);
+    digitalWrite(this->MotorFR->Motor_EnPin,(int)status);
+    digitalWrite(this->MotorFL->Motor_EnPin,(int)status);
+    digitalWrite(this->MotorBR->Motor_EnPin,(int)status);
+    digitalWrite(this->MotorBL->Motor_EnPin,(int)status);
  }
 
 void Motortot::Motortot_SetDir(bool FL,bool FR,bool BL,bool BR)

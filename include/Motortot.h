@@ -21,7 +21,7 @@ public:
     void Motortot_RotRight(int delayms);
     void Motortot_ForLeftR(int delayms,int round);
     void Motortot_ForRightR(int delayms,int round);
-    void Motortot_En(bool stats);
+    void Motortot_En(bool status);
     void Motortot_Reset();
     void Motortot_SetDir(bool FL,bool FR,bool BL,bool BR);
     void Motortot_SetDirForward();

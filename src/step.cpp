@@ -1,11 +1,13 @@
 #include"step.h"
-Motortot Mtot1(4,3,2,10,9,8,13,12,11,7,6,5);//AEn,Astp,Adir,Bstp,BEn,Bdir,CEn,Cstp,Cdir,DEn,Dstp,Ddir
+#define SPEED 100
+Motortot Mtot1(4,3,2,10,9,8,7,6,5,13,12,11);//AEn,Astp,Adir,Bstp,BEn,Bdir,CEn,Cstp,Cdir,DEn,Dstp,Ddir
 bool Break_Flag = 0;
 bool LinePassBreak=0;
 String QRCode="";
 int line=0,check=0;
 enum Dirc{F=1,B,L,R};
-int HT[2]={1,2};
+int HT[2]={A2,A3};
+u8 count=0;
 
 void uart_Init()
  {
@@ -49,42 +51,43 @@ void Follow()
         case 0xF7:     Mtot1.Motortot_SetDirRotLeft(); delay(30);Mtot1.Motortot_SteprunRAW(10,30); break;      //1111 0111
         case 0xE7:     Mtot1.Motortot_SetDirForward();delay(30); Mtot1.Motortot_SteprunRAW(10,10); break;      //1110 0111   //正中间的位置
         case 0xEF:     Mtot1.Motortot_SetDirRotRight(); delay(30);Mtot1.Motortot_SteprunRAW(10,30);break;       //1110 1111
-        case 0x00:     Mtot1.Motortot_Reset();break;
+        case 0x00:    break;
         default :         Mtot1.Motortot_SetDirForward();delay(30); Mtot1.Motortot_SteprunRAW(10,10); break;  
     }
 }
 
 
-
-void FindMid_Left()
+void FindMid_Left(int delayms)
 {
   Mtot1.Motortot_SetDirLeft();
   do
   {
+    for(int i=0;i<50;i++)
+    {
+    Mtot1.Motortot_Steprun(delayms);
+    }
     Read_Data(Temp);
-    Mtot1.Motortot_Steprun(100);
   }
-  while(Temp[0]!=0xF7);  
+  while(Temp[0]!=0xF7 && Temp[0]!=0xE7 && Temp[0]!=0xEF); 
 }
 
-void FindMid_Right()
+void FindMid_Right(int delayms)
 {
   Mtot1.Motortot_SetDirRight();
   do
   {
     Read_Data(Temp);
-    Mtot1.Motortot_Steprun(100);
+    Mtot1.Motortot_Steprun(delayms);
   }
   while(Temp[0]!=0xF7);  
 }
 
-bool NLine_Status()
+bool NOnLineCheck()
 {
   Read_Data(Temp);
-  u8 count=0;
-  for(u8 i=0x01;i<<1;i<0x80)
+  for(u8 i=0x01;i<0x80;i<<1)
   {
-    if(1==Temp[0]&i)
+    if((Temp[0]&i)==0x01)
     {
       count++;
     }
@@ -108,7 +111,7 @@ void NLine_Plus(int delayms)
     {
         if(!(check%=100))
         {
-            if (!(NLine_Status()))
+            if (!(NOnLineCheck()))
             {
                 LinePassBreak=1;
             }
@@ -130,13 +133,17 @@ void NGoline(u8 Lineobj,int delayms)
     {
         if(!(check%=200))
         {
-            if (NLine_Status())
+            if (NOnLineCheck())
             {
                 NLine_Plus(delayms);
                 if(line==Lineobj)
                 {
                     Break_Flag=1;
                 }
+            }
+            else
+            {
+              Follow();
             }
         }
         Mtot1.Motortot_Steprun(delayms);
@@ -168,9 +175,18 @@ void MotorTestDemo()
 
 void runtest()
 {   
-    Mtot1.Motortot_ForwardR(100,1);
+    Mtot1.Motortot_ForwardR(SPEED,1);
     delay(100);
-    Mtot1.Motortot_SetDirLeft();
+    Mtot1.Motortot_LeftR(SPEED,2);
+    delay(100);
+    FindMid_Left(200);
+    delay(100);
+    Mtot1.Motortot_LeftR(SPEED,1);
+    NGoline(2,SPEED);
+    NGoline(3,SPEED);
+    Mtot1.Motortot_RightR(SPEED,1);
+    FindMid_Right(SPEED);
+
     
     
     
