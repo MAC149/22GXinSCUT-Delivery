@@ -6,7 +6,7 @@ extern int HT[2];
 void setup()
 {
     Serial.begin(9600);
-    Serial3.begin(9600);
+    HT_Uart_Init();
     Mtot1.Motortot_Init();
     for(int i=0;i<2;i++)
     {

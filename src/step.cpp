@@ -9,7 +9,7 @@ enum Dirc{F=1,B,L,R};
 int HT[2]={A2,A3};
 u8 count=0;
 
-void uart_Init()
+void HT_Uart_Init()
  {
    Serial3.begin(9600);  
  }
@@ -50,8 +50,8 @@ void Follow()
     {                                     
         case 0xF7:     Mtot1.Motortot_SetDirRotLeft(); delay(30);Mtot1.Motortot_SteprunRAW(10,30); break;      //1111 0111
         case 0xE7:     Mtot1.Motortot_SetDirForward();delay(30); Mtot1.Motortot_SteprunRAW(10,10); break;      //1110 0111   //正中间的位置
-        case 0xEF:     Mtot1.Motortot_SetDirRotRight(); delay(30);Mtot1.Motortot_SteprunRAW(10,30);break;       //1110 1111
-        case 0x00:    break;
+        case 0xEF:     break;       //1110 1111
+        case 0x00:     break;
         default :         Mtot1.Motortot_SetDirForward();delay(30); Mtot1.Motortot_SteprunRAW(10,10); break;  
     }
 }
@@ -68,7 +68,7 @@ void FindMid_Left(int delayms)
     }
     Read_Data(Temp);
   }
-  while(Temp[0]!=0xF7 && Temp[0]!=0xE7 && Temp[0]!=0xEF); 
+  while(Temp[0]!=0xEF); 
 }
 
 void FindMid_Right(int delayms)
@@ -79,7 +79,29 @@ void FindMid_Right(int delayms)
     Read_Data(Temp);
     Mtot1.Motortot_Steprun(delayms);
   }
-  while(Temp[0]!=0xF7);  
+  while(Temp[0]!=0xEF);  
+}
+
+void Find_RightEdge(int delayms)
+{
+  Mtot1.Motortot_SetDirRight();
+  do
+  {
+    Read_Data(Temp);
+    Mtot1.Motortot_Steprun(delayms);
+  }
+  while(Temp[0]!=0x7F);  
+}
+
+void Find_LeftEdge(int delayms)
+{
+  Mtot1.Motortot_SetDirLeft();
+  do
+  {
+    Read_Data(Temp);
+    Mtot1.Motortot_Steprun(delayms);
+  }
+  while(Temp[0]!=0xFE);  
 }
 
 bool NOnLineCheck()
@@ -175,18 +197,33 @@ void MotorTestDemo()
 
 void runtest()
 {   
-    Mtot1.Motortot_ForwardR(SPEED,1);
-    delay(100);
-    Mtot1.Motortot_LeftR(SPEED,2);
-    delay(100);
-    FindMid_Left(200);
-    delay(100);
-    Mtot1.Motortot_LeftR(SPEED,1);
-    NGoline(2,SPEED);
-    NGoline(3,SPEED);
-    Mtot1.Motortot_RightR(SPEED,1);
-    FindMid_Right(SPEED);
-
+  Mtot1.Motortot_ForwardR(SPEED,1);//向前一步
+  delay(100);
+  Mtot1.Motortot_LeftR(SPEED,2);//向左到第二格
+  delay(100);
+  FindMid_Left(200);//左巡线
+  delay(100);
+  NGoline(2,SPEED);//前走2线
+  //QRcode
+  NGoline(3,SPEED);//前走三线
+  //openmv
+  Mtot1.Motortot_RightR(SPEED,1);
+  FindMid_Right(SPEED);
+  //servo
+  Mtot1.Motortot_RotLeft(SPEED);
+  FindMid_Right(SPEED);
+  NGoline(3,SPEED);
+  //servo
+  NGoline(2,SPEED);
+  Mtot1.Motortot_RotLeft(SPEED);
+  FindMid_Right(SPEED);
+  NGoline(2,SPEED);
+  //servo
+  Mtot1.Motortot_RotLeft(SPEED);
+  NGoline(5,SPEED);
+  Mtot1.Motortot_RotLeft(SPEED);
+  Find_RightEdge(SPEED);
+  
     
     
     

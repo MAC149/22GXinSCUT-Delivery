@@ -4,3 +4,4 @@
 #include"QRScanner.h"
 void runtest();
 void MotorTestDemo();
+void HT_Uart_Init();
