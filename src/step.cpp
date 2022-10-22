@@ -1,51 +1,23 @@
 #include"step.h"
 #define SPEED 100
-Motortot Mtot1(4,3,2,10,9,8,7,6,5,13,12,11);//AEn,Astp,Adir,Bstp,BEn,Bdir,CEn,Cstp,Cdir,DEn,Dstp,Ddir
+Motortot Mtot1(52,50,48,46,44,42,40,38,36,34,32,30);//AEn,Astp,Adir,Bstp,BEn,Bdir,CEn,Cstp,Cdir,DEn,Dstp,Ddir
+Motor MotRot(53,51,49);
+Motor MotLift(47,45,43);
+int LeftHT[5]={31,29,27,25,23};//L2 L1 M R1 R2
+int RightHT[5]={41,39,37,35,33};
 bool Break_Flag = 0;
 bool LinePassBreak=0;
 String QRCode="";
 int line=0,check=0;
 enum Dirc{F=1,B,L,R};
-int HT[2]={A2,A3};
 u8 count=0;
 
-void HT_Uart_Init()
- {
-   Serial3.begin(9600);  
- }
- 
 unsigned int Temp[2] = { 0 };
 unsigned int Temp1[2] = { 0 };
 
-void Read_Data(unsigned int *Data)         
-{ 
-  unsigned char y = 0;
-  unsigned char USART_RX_STA[3] = { 0 };       //数据缓存区
-  unsigned char Num = 0;              //数组计数
-  unsigned int Receive_data = 0;       //数据缓存区
-  
-  Serial3.write(0x57);
- ///////////////////////////数字量数值///////////////////////////////  
- 
-  for(y=0;y <= 5;y++)
-  {
-    delay(1);
-    if(Serial3.available() > 0)
-    {
-      USART_RX_STA[Num++] = Serial3.read(); //依次读取接收到的数据
-      if(Num == 1)
-      {
-        Num = 0;
-        *Data = USART_RX_STA[0];
-        break;
-      }
-    } 
-  }
-} 
-
 void Follow()
 {
-    Read_Data(Temp1);
+    Read_Data(&Serial3,Temp1);
     switch(Temp1[0])
     {                                     
         case 0xF7:     Mtot1.Motortot_SetDirRotLeft(); delay(30);Mtot1.Motortot_SteprunRAW(10,30); break;      //1111 0111
@@ -66,7 +38,7 @@ void FindMid_Left(int delayms)
     {
     Mtot1.Motortot_Steprun(delayms);
     }
-    Read_Data(Temp);
+    Read_Data(&Serial3,Temp);
   }
   while(Temp[0]!=0xEF); 
 }
@@ -76,7 +48,7 @@ void FindMid_Right(int delayms)
   Mtot1.Motortot_SetDirRight();
   do
   {
-    Read_Data(Temp);
+    Read_Data(&Serial3,Temp);
     Mtot1.Motortot_Steprun(delayms);
   }
   while(Temp[0]!=0xEF);  
@@ -87,7 +59,7 @@ void Find_RightEdge(int delayms)
   Mtot1.Motortot_SetDirRight();
   do
   {
-    Read_Data(Temp);
+    Read_Data(&Serial3,Temp);
     Mtot1.Motortot_Steprun(delayms);
   }
   while(Temp[0]!=0x7F);  
@@ -98,7 +70,7 @@ void Find_LeftEdge(int delayms)
   Mtot1.Motortot_SetDirLeft();
   do
   {
-    Read_Data(Temp);
+    Read_Data(&Serial3,Temp);
     Mtot1.Motortot_Steprun(delayms);
   }
   while(Temp[0]!=0xFE);  
@@ -106,7 +78,7 @@ void Find_LeftEdge(int delayms)
 
 bool NOnLineCheck()
 {
-  Read_Data(Temp);
+  Read_Data(&Serial3,Temp);
   for(u8 i=0x01;i<0x80;i<<1)
   {
     if((Temp[0]&i)==0x01)
@@ -178,6 +150,7 @@ void NGoline(u8 Lineobj,int delayms)
 
 void MotorTestDemo()
 {
+    /*
     Mtot1.Motortot_ForwardR(200,2);
     delay(2000);
     Mtot1.Motortot_BackwardR(200,2);
@@ -191,7 +164,14 @@ void MotorTestDemo()
     delay(2000);
     Mtot1.Motortot_RotRight(200);
     Mtot1.Motortot_Reset();
-    delay(2000);
+    delay(2000);*/
+    MotRot.Motor_En(1);
+    MotLift.Motor_En(1);
+    MotRot.Motor_round(SPEED,1,1);
+    //MotRot.Motor_round(SPEED,1,0);
+    MotLift.Motor_round(SPEED,1,1);
+    //MotLift.Motor_round(SPEED,1,0);
+;    
 }
 
 

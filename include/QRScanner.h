@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include "SoftwareSerial.h"
 
-void QR_Init(HardwareSerial *p);
 String QR_Getstring(HardwareSerial *p);
+String QR_Getstring(SoftwareSerial *p);

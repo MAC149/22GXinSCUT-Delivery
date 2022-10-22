@@ -1,24 +1,28 @@
 #include"step.h"
 
 extern Motortot Mtot1;
-extern int HT[2];
-
+extern Motor MotRot,MotLift;
+extern int LeftHT[5],RightHT[5];
+SoftwareSerial qrcode(10,11);
 void setup()
 {
     Serial.begin(9600);
-    HT_Uart_Init();
+    Serial_Init(&qrcode);
     Mtot1.Motortot_Init();
-    for(int i=0;i<2;i++)
+    MotRot.Motor_Init();
+    MotLift.Motor_Init();
+    for(int i=0;i<5;i++)
     {
-        pinMode(HT[2],INPUT);
+        pinMode(LeftHT[i],INPUT);
+        pinMode(RightHT[i],INPUT);
     }
 }
 
 void loop()
 {
     delay(2000);
-    runtest();
-    //MotorTestDemo();
+    //runtest();
+    MotorTestDemo();
     while(1);
     
 }
