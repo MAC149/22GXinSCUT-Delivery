@@ -1,8 +1,8 @@
 #include "Uart.h"
-void Serial_Init(HardwareSerial *p)
+/* void Serial_Init(HardwareSerial *p)
 {
   p->begin(9600);
-}
+} */
 
 void Serial_Init(SoftwareSerial *p)
 {
