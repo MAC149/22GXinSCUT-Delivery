@@ -31,17 +31,33 @@ void Motor::Motor_round(int delayms,int round,bool dir)//dir 0顺时针
   for(i=0;i<=6400*round;i++)
   {
     delayMicroseconds(delayms);
-    digitalWrite(this->Motor_StpPin, !digitalRead(this->Motor_StpPin));
+    this->Motor_StpRun();
   }
 }
 
+void Motor::Motor_roundPair(int delayms,int round,bool dir)//dir 0顺时针
+{
+  u8 i = 0;
+  digitalWrite(this->Motor_DirPin,(int)dir);
+  for(i=0;i<=3200*round;i++)
+  {
+    delayMicroseconds(delayms);
+    this->Motor_StpRunPair();
+  }
+}
 
 void Motor::Motor_StpRun()
 {
   digitalWrite(this->Motor_StpPin, !digitalRead(this->Motor_StpPin));
 }
 
-void Motor::Motor_StpRunPair(int delayms)
+void Motor::Motor_StpRunPair()
+{
+  digitalWrite(this->Motor_StpPin, 1);
+  digitalWrite(this->Motor_StpPin, 0);
+}
+
+void Motor::Motor_StpRunPairDelay(int delayms)
 {
   digitalWrite(this->Motor_StpPin, 1);
   delayMicroseconds(delayms);

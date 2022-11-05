@@ -150,28 +150,26 @@ void NGoline(u8 Lineobj,int delayms)
 
 void MotorTestDemo()
 {
-    /*
-    Mtot1.Motortot_ForwardR(200,2);
-    delay(2000);
-    Mtot1.Motortot_BackwardR(200,2);
-    delay(2000);
-    Mtot1.Motortot_LeftR(200,2);
-    delay(2000);
-    Mtot1.Motortot_RightR(200,2);
-    delay(2000);
-    Mtot1.Motortot_RotLeft(200);
-    Mtot1.Motortot_Reset();
-    delay(2000);
-    Mtot1.Motortot_RotRight(200);
-    Mtot1.Motortot_Reset();
-    delay(2000);*/
-    MotRot.Motor_En(1);
-    MotLift.Motor_En(1);
-    MotRot.Motor_round(SPEED,1,1);
-    //MotRot.Motor_round(SPEED,1,0);
-    MotLift.Motor_round(SPEED,1,1);
-    //MotLift.Motor_round(SPEED,1,0);
-;    
+  /* Mtot1.Motortot_ForwardR(200,2);
+  delay(2000);
+  Mtot1.Motortot_BackwardR(200,2);
+  delay(2000);
+  Mtot1.Motortot_LeftR(200,2);
+  delay(2000);
+  Mtot1.Motortot_RightR(200,2);
+  delay(2000);
+  Mtot1.Motortot_RotLeft(200);
+  Mtot1.Motortot_Reset();
+  delay(2000);
+  Mtot1.Motortot_RotRight(200);
+  Mtot1.Motortot_Reset();
+  delay(2000);  */
+  MotRot.Motor_En(1);
+  MotLift.Motor_En(1);
+  MotRot.Motor_round(SPEED,1,1);
+  //MotRot.Motor_round(SPEED,1,0);
+  MotLift.Motor_round(SPEED,1,1);
+  // MotLift.Motor_round(SPEED,1,0);
 }
 
 

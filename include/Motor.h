@@ -10,9 +10,11 @@ public:
   void Motor_Init();
   Motor(int En,int Sto,int Dir);
   void Motor_round(int delayms,int round,bool Dir);
+  void Motor_roundPair(int delayms,int round,bool dir);
   void Motor_Reset();
   void Motor_StpRun();
-  void Motor_StpRunPair(int delayms);
+  void Motor_StpRunPair();
+  void Motor_StpRunPairDelay(int delayms);
   void Motor_SetDir(bool Dir);
   void Motor_En(bool Status);
 };

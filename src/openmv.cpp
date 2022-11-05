@@ -12,12 +12,12 @@ void Uart_send_openmv(HardwareSerial *p,char CMD)
   switch(CMD){
     case '1':
     p->print("CM+ST");  
-    Serial.println("Send to openmv:CM+ST");
+    Serial.println("Send to openmv:START");
     break;
 
     case '2':
     p->print("CM+ED"); 
-    Serial.println("Send to openmv:CM+WL");
+    Serial.println("Send to openmv:END");
     break;
     
     default :
@@ -32,12 +32,12 @@ void Uart_send_openmv(SoftwareSerial *p,char CMD)
   switch(CMD){
     case '1':
     p->print("CM+ST");  
-    Serial.println("Send to openmv:CM+ST");
+    Serial.println("Send to openmv:START");
     break;
 
     case '2':
     p->print("CM+ED"); 
-    Serial.println("Send to openmv:CM+WL");
+    Serial.println("Send to openmv:END");
     break;
     
     default :
