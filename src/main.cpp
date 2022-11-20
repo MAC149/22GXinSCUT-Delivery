@@ -1,13 +1,17 @@
 #include"step.h"
-
 extern Motortot Mtot1;
 extern Motor MotRot,MotLift;
 extern int LeftHT[5],RightHT[5];
+extern Servo Servo_Pad,Servo_Paw;
+extern U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2;
 SoftwareSerial qrcode(10,11);
 void setup()
 {
     Serial.begin(9600);
     Serial_Init(&qrcode);
+    Serial1.begin(9600);    //openmv
+    Serial2.begin(9600);    //front HT
+    Serial3.begin(9600);    //back HT
     Mtot1.Motortot_Init();
     MotRot.Motor_Init();
     MotLift.Motor_Init();
@@ -16,6 +20,10 @@ void setup()
         pinMode(LeftHT[i],INPUT);
         pinMode(RightHT[i],INPUT);
     }
+    pinMode(A1,INPUT);
+    pinMode(A2,INPUT);
+    Servo_Pad.attach(A0);
+    Servo_Paw.attach(A3);
 }
 
 void loop()
