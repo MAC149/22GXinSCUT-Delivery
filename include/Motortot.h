@@ -19,6 +19,8 @@ public:
     void Motortot_RightTime(int delayms,int time);
     void Motortot_RotLeft(int delayms);
     void Motortot_RotRight(int delayms);
+    void Motortot_RotLeftTime(int delayms,int time);
+    void Motortot_RotRightTime(int delayms,int time);
     void Motortot_ForLeftTime(int delayms,int time);
     void Motortot_ForRightTime(int delayms,int time);
     void Motortot_En(bool status);

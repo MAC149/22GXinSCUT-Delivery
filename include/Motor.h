@@ -14,5 +14,6 @@ public:
   void Motor_StpRun();
   void Motor_SetDir(bool Dir);
   void Motor_En(bool Status);
-  void Motor_StpRunTime(int time,int delayms);
+  void Motor_StpRunTime(int delayms,int time);
+  void Motor_RunAllSet(bool dir,int delayms,int time);
 };

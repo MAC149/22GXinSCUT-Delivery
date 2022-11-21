@@ -47,8 +47,19 @@ void Motor::Motor_SetDir(bool Dir)
   digitalWrite(this->Motor_EnPin,1);
 }
 
-void Motor::Motor_StpRunTime(int time,int delayms)
+void Motor::Motor_StpRunTime(int delayms,int time)
 {
+  for(int i=0;i<time;i++)
+  {
+    digitalWrite(this->Motor_StpPin, 1);
+    digitalWrite(this->Motor_StpPin, 0);
+    delayMicroseconds(delayms);
+  }
+}
+
+void Motor::Motor_RunAllSet(bool dir,int delayms,int time)
+{
+  this->Motor_SetDir(dir);
   for(int i=0;i<time;i++)
   {
     digitalWrite(this->Motor_StpPin, 1);

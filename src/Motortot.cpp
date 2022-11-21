@@ -124,6 +124,35 @@ void Motortot::Motortot_RotRight(int delayms)
     }
 }
 
+void Motortot::Motortot_RotLeftTime(int delayms,int time)
+{
+    this->Motortot_SetDir(1,1,1,1);
+    this->Motortot_En(1);
+    for(int i=0;i<=time;i++)
+    {
+        MotorFL->Motor_StpRun();
+        MotorFR->Motor_StpRun();
+        MotorBL->Motor_StpRun();
+        MotorBR->Motor_StpRun();
+        delayMicroseconds(delayms);
+    }
+}
+
+void Motortot::Motortot_RotRightTime(int delayms,int time)
+{
+    this->Motortot_SetDir(0,0,0,0);
+    this->Motortot_En(1);
+    for(int i=0;i<=time;i++)
+    {
+        MotorFL->Motor_StpRun();
+        MotorFR->Motor_StpRun();
+        MotorBL->Motor_StpRun();
+        MotorBR->Motor_StpRun();
+        delayMicroseconds(delayms);
+    }
+}
+
+
 void Motortot::Motortot_ForLeftTime(int delayms,int time)
     {
         this->Motortot_SetDir(0,1,0,1);

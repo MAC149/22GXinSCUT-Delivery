@@ -15,6 +15,8 @@ void setup()
     Mtot1.Motortot_Init();
     MotRot.Motor_Init();
     MotLift.Motor_Init();
+    MotRot.Motor_En(1);
+    MotLift.Motor_En(1);
     for(int i=0;i<5;i++)
     {
         pinMode(LeftHT[i],INPUT);
@@ -30,7 +32,8 @@ void loop()
 {
     delay(2000);
     //runtest();
-    MotorTestDemo();
+    //MotorTestDemo();
+    Place_P1_Red();
     while(1);
     
 }

@@ -1,6 +1,6 @@
 #include<openmv.h>
 
-
+extern String QRCode;
 String WL1_pose;    // 上层物料放置位置
 String WL2_pose;    // 下层物料放置位置
 
@@ -140,4 +140,59 @@ void Get_message(SoftwareSerial *p,char task)   // Q-二维码 P-物料位置 S-
     default : 
     break;
   }
+}
+
+int Action_Order(int Phase,int target)
+{
+  if(Phase==1)
+  {
+    for(int i=0;i<3;i++)
+    {
+      if(WL1_pose[i]==target)
+      {
+        return i;
+      }
+    }
   }
+  else
+  {
+    for(int i=0;i<3;i++)
+    {
+      if(WL2_pose[i]==target)
+      {
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
+void Pick_Action(int Phase)
+{
+  if(Phase==1)
+  {
+    for(int i=0;i<3;i++)
+    {
+      switch(Action_Order(Phase,QRCode[i]))
+      {
+        case 1:Pick_UpLeft();break;
+        case 2:Pick_UpMid();break;
+        case 3:Pick_UpRight();break;
+        default:break;
+      }
+    }
+  }
+  else
+  {
+    for(int i=4;i<7;i++)
+    {
+      switch(Action_Order(Phase,QRCode[i]))
+      {
+        case 1:Pick_DownLeft();break;
+        case 2:Pick_DownMid();break;
+        case 3:Pick_DownRight();break;
+        default:break;
+      }
+    }
+  }
+}
