@@ -26,11 +26,17 @@ void setup()
     pinMode(A2,INPUT);
     Servo_Pad.attach(A0);
     Servo_Paw.attach(A3);
+    mpu_Init();
 }
 
 void loop()
 {
     delay(2000);
+    while(1)
+    {
+        mpu6050();
+        delay(50);
+    }
     //runtest();
     //MotorTestDemo();
     Place_P1_Red();

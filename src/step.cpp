@@ -43,7 +43,7 @@ void MotorTestDemo()
   // MotLift.Motor_round(SPEED,1,0);
 }
 
-void runtest()
+/* void runtest()
 {   
   Mtot1.Motortot_ForwardTime(SPEED,3200);//向前一步
   delay(100);
@@ -75,7 +75,7 @@ void runtest()
     
     
     
-}
+} */
 
 
 
@@ -83,7 +83,8 @@ void step1()
 {
   Mtot1.Motortot_ForLeftTime(SPEED, 12000);
   Mtot1.Motortot_BackwardTime(SPEED, 1300);
-  Follow();
+  mpuadjust(0);
+  Find_Mid();
 
   while (QRCode == "")                 //扫码
   {

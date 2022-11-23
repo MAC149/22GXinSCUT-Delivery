@@ -1,4 +1,6 @@
 #include"track.h"
+#define SPEED 200
+enum Dir{N=0,S=180,W=-90,E=90};
 unsigned int Temp[2] = { 0 };
 unsigned int Temp1[2] = { 0 };
 extern Motortot Mtot1;
@@ -7,32 +9,51 @@ bool Break_Flag = 0;
 bool LinePassBreak=0;
 int line=0,check=0;
 u8 count=0;
-void Follow()
-{
-    Read_Data(&Serial3,Temp1);
-    switch(Temp1[0])
-    {                                     
-        case 0xEF:     Mtot1.Motortot_SetDirRotLeft(); delay(30);Mtot1.Motortot_SteprunRAW(10,30); break;      //1110 1111 
-        case 0xE7:     Mtot1.Motortot_SetDirForward();delay(30); Mtot1.Motortot_SteprunRAW(10,10); break;      //1110 0111   //正中间的位置
-        case 0xF7:     break;       //1111 0111
-        case 0x00:     break;
-        default :         Mtot1.Motortot_SetDirForward();delay(30); Mtot1.Motortot_SteprunRAW(10,10); break;  
-    }
-}
 
+void mpuadjust(double angle)
+{
+  double temp;
+  if(angle == 180 || angle == -180)
+  {
+    while(1)
+    {
+      temp = (mpu6050() + mpu6050()+ mpu6050()) / 3.0;
+      if((temp > -180 + 0.5)&&(temp < 0)){
+        Mtot1.Motortot_RotRightTime(200, 16);
+        //u8g2.drawStr(0,40,ecvt()
+      }
+      else if((temp < 180 - 0.5)&&(temp >= 0)){
+        Mtot1.Motortot_RotLeftTime(200, 16);;
+      }
+      else
+        break;
+    }
+  }
+  else{
+    while(1){
+    temp = (mpu6050() + mpu6050()+ mpu6050()) / 3.0;
+    if(temp > angle+ 0.5){
+      Mtot1.Motortot_RotLeftTime(200, 16);
+      //u8g2.drawStr(0,40,ecvt()
+    }
+    else if(temp < angle- 0.5){
+       Mtot1.Motortot_RotRightTime(200, 16);;
+    }
+    else
+      break;
+    }
+  } 
+}
 
 void FindMid_Left(int delayms)
 {
   Mtot1.Motortot_SetDirLeft();
   do
   {
-    for(int i=0;i<50;i++)
-    {
-    Mtot1.Motortot_Steprun(delayms);
-    }
     Read_Data(&Serial3,Temp);
+    Mtot1.Motortot_Steprun(delayms);
   }
-  while(Temp[0]!=0xEF); 
+  while(Temp[0]!=0xF7);  
 }
 
 void FindMid_Right(int delayms)
@@ -43,7 +64,7 @@ void FindMid_Right(int delayms)
     Read_Data(&Serial3,Temp);
     Mtot1.Motortot_Steprun(delayms);
   }
-  while(Temp[0]!=0xEF);  
+  while(Temp[0]!=0xF7);  
 }
 
 void Find_RightEdge(int delayms)
@@ -57,18 +78,42 @@ void Find_RightEdge(int delayms)
   while(Temp[0]!=0x7F);  
 }
 
-void Find_LeftEdge(int delayms)
+
+
+
+
+void Find_Mid()
 {
-  Mtot1.Motortot_SetDirLeft();
-  do
+  Read_Data(&Serial3,Temp);
+  if(Temp[0]==0xF7)
   {
-    Read_Data(&Serial3,Temp);
-    Mtot1.Motortot_Steprun(delayms);
+    return;
   }
-  while(Temp[0]!=0xFE);  
+  else if(Temp[0]>0xE7)
+  {
+    Find_LeftEdge(SPEED);
+  }
+  else if(Temp[0]<0xE7)
+  {
+    FindMid_Right(SPEED);
+  }
 }
 
-bool NOnLineCheck()
+
+void Follow()
+{
+    Read_Data(&Serial3,Temp1);
+    switch(Temp1[0])
+    {                                     
+        case 0xEF:     Mtot1.Motortot_SetDirRotLeft(); delay(30);Mtot1.Motortot_SteprunRAW(10,30); break;      //1110 1111 
+        case 0xE7:     Mtot1.Motortot_SetDirForward();delay(30); Mtot1.Motortot_SteprunRAW(10,10); break;      //1110 0111   //正中间的位置
+        case 0xF7:     break;       //1111 0111
+        case 0x00:     break;
+        default :         Mtot1.Motortot_SetDirForward();delay(30); Mtot1.Motortot_SteprunRAW(10,10); break;  
+    }
+}
+
+bool FROnLineCheck()
 {
   Read_Data(&Serial3,Temp);
   for(u8 i=0x01;i<0x80;i<<1)
@@ -90,7 +135,7 @@ bool NOnLineCheck()
   }
 }
 
-bool NOnLineCheckSim()
+bool FROnLineCheckSim()
 {
     Read_Data(&Serial3,Temp);
     if(Temp[0]==0x00)
@@ -103,14 +148,14 @@ bool NOnLineCheckSim()
     }
 }
 
-void NLine_Plus(int delayms)
+void FRLine_Plus(int delayms)
 {
   bool LinePassBreak=0;
     do
     {
         if(!(check%=100))
         {
-            if (!(NOnLineCheck()))
+            if (!(FROnLineCheckSim()))
             {
                 LinePassBreak=1;
             }
@@ -122,7 +167,7 @@ void NLine_Plus(int delayms)
 line++;
 }
   
-void NGoline(u8 Lineobj,int delayms)
+void FRGoline(int Dir,u8 Lineobj,int delayms)
 {
     Break_Flag=0;
     check=0;
@@ -132,9 +177,9 @@ void NGoline(u8 Lineobj,int delayms)
     {
         if(!(check%=200))
         {
-            if (NOnLineCheck())
+            if (FROnLineCheck())
             {
-                NLine_Plus(delayms);
+                FRLine_Plus(delayms);
                 if(line==Lineobj)
                 {
                     Break_Flag=1;
@@ -142,7 +187,8 @@ void NGoline(u8 Lineobj,int delayms)
             }
             else
             {
-              Follow();
+              mpuadjust(Dir);
+              Find_Mid();
             }
         }
         Mtot1.Motortot_Steprun(delayms);
