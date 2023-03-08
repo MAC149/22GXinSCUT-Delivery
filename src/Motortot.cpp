@@ -100,7 +100,7 @@ void Motortot::Motortot_RotLeft(int delayms)
 {
     this->Motortot_SetDir(1,1,1,1);
     this->Motortot_En(1);
-    for(int i=0;i<=4000;i++)
+    for(int i=0;i<=3200;i++)
     {
         MotorFL->Motor_StpRun();
         MotorFR->Motor_StpRun();
@@ -114,7 +114,7 @@ void Motortot::Motortot_RotRight(int delayms)
 {
     this->Motortot_SetDir(0,0,0,0);
     this->Motortot_En(1);
-    for(int i=0;i<=4000;i++)
+    for(int i=0;i<=3200;i++)
     {
         MotorFL->Motor_StpRun();
         MotorFR->Motor_StpRun();
@@ -153,7 +153,7 @@ void Motortot::Motortot_RotRightTime(int delayms,int time)
 }
 
 
-void Motortot::Motortot_ForLeftTime(int delayms,int time)
+void Motortot::Motortot_ForRightTime(int delayms,int time)
     {
         this->Motortot_SetDir(0,1,0,1);
         this->Motortot_En(1);
@@ -167,7 +167,7 @@ void Motortot::Motortot_ForLeftTime(int delayms,int time)
         }
     }
     
-void Motortot::Motortot_ForRightTime(int delayms,int time)
+void Motortot::Motortot_ForLeftTime(int delayms,int time)
     {
         this->Motortot_SetDir(0,1,0,1);
         this->Motortot_En(1);

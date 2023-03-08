@@ -11,3 +11,4 @@
 #endif
 void runtest();
 void MotorTestDemo();
+void step1();

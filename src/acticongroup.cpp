@@ -1,17 +1,18 @@
 #include"actiongroup.h"
-#define SPEED 200
+#define SPEED 300
 #define PAW_CLOSE 42
-#define PAW_OPEN 80
+#define PAW_OPEN 76
 #define PAD_ONE 60
 #define PAD_TWO 120
-#define PAD_THREE 180
-#define ROTSTP 3300
+#define PAD_THREE 175
+#define ROTSTP 2850
 
 extern Motortot Mtot1;
 extern Motor MotRot,MotLift;
 extern Servo Servo_Pad,Servo_Paw;
 enum Lift{UP=0,DOWN};
 enum RotDir{RotR=0,RotL};
+
 void LiftReset()
 {
   MotLift.Motor_SetDir(0);
@@ -131,12 +132,14 @@ void Place_P1()
   LimitReset();
   Mtot1.Motortot_ForwardTime(SPEED, 1500);        //前进
   MotRot.Motor_RunAllSet(RotL,300, ROTSTP); //旋转电机左旋
+  delay(1000);//----------
   MotLift.Motor_RunAllSet(DOWN,SPEED, 2000);     //升降电机下降
   Servo_Paw.write(PAW_CLOSE); 
   MotLift.Motor_RunAllSet(UP,SPEED, 250);     //升降电机下降
   RotReset();     
   MotLift.Motor_RunAllSet(DOWN,SPEED, 9800);
   Servo_Paw.write(PAW_OPEN);
+  delay(1000);//----------------
   Mtot1.Motortot_BackwardTime(SPEED, 1500);       //后退
   LimitReset();
 }
@@ -158,3 +161,12 @@ void Place_P1_Green()//R
   Mtot1.Motortot_LeftTime(SPEED, 1800);
 }
 
+void Place_P2()
+{
+
+}
+
+void Place_P3()
+{
+
+}

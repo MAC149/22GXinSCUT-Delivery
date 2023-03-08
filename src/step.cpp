@@ -1,5 +1,5 @@
 #include"step.h"
-#define SPEED 200
+#define SPEED 300
 Motortot Mtot1(52,50,48,46,44,42,40,38,36,34,32,30);//AEn,Astp,Adir,Bstp,BEn,Bdir,CEn,Cstp,Cdir,DEn,Dstp,Ddir
 Motor MotRot(53,51,49);
 Motor MotLift(47,45,43);
@@ -11,6 +11,7 @@ int RightHT[5]={41,39,37,35,33};
 String QRCode="";
 extern SoftwareSerial qrcode;
 enum Dirc{F=1,B,L,R};
+enum MPUDir{N=0,S=180,W=90,E=-90};
 
 
 
@@ -37,8 +38,17 @@ void MotorTestDemo()
   delay(2000);  */
   MotRot.Motor_En(1);
   MotLift.Motor_En(1);
+  MotLift.Motor_SetDir(1);
+  MotRot.Motor_SetDir(1);
+  MotLift.Motor_StpRunTime(300,3000);
+  MotRot.Motor_StpRunTime(300,3000);
   LiftReset();
   RotReset();
+   MotLift.Motor_SetDir(1);
+  MotRot.Motor_SetDir(1);
+  MotLift.Motor_StpRunTime(300,3000);
+  MotRot.Motor_StpRunTime(300,3000);
+  LimitReset();
   //MotRot.Motor_round(SPEED,1,0);
   // MotLift.Motor_round(SPEED,1,0);
 }
@@ -83,9 +93,9 @@ void step1()
 {
   Mtot1.Motortot_ForLeftTime(SPEED, 12000);
   Mtot1.Motortot_BackwardTime(SPEED, 1300);
-  mpuadjust(0);
-  Find_Mid();
-
+  //mpuadjust(N);
+  //Find_Mid();
+  FRGoline(1,SPEED);
   while (QRCode == "")                 //扫码
   {
     QRCode = QR_Getstring(&qrcode);
@@ -93,26 +103,44 @@ void step1()
   u8g2.setFont(u8g2_font_inr16_mf);
   u8g2.drawStr(0, 32, &QRCode[0]);
   u8g2.sendBuffer();
-
-
-
-  //2、前往原料区（上层） step02();
-  Mtot1.Motortot_ForLeftTime(SPEED, 8000);
-  Mtot1.Motortot_BackwardTime(SPEED, 1500);
-  Follow();
-  Mtot1.Motortot_ForwardTime(SPEED, 400);
-  Follow();
-  Mtot1.Motortot_ForwardTime(SPEED, 400);
-  Follow();
+  ///2、前往原料区（上层） step02();
+  Mtot1.Motortot_ForLeftTime(SPEED,8000);
+  Mtot1.Motortot_BackwardTime(SPEED,1200);
+  FRGoline(3,SPEED);
   Mtot1.Motortot_ForwardTime(SPEED, 1500); //前进半格
   Mtot1.Motortot_RotRight(SPEED); //4100转过九十度
-  Follow();
+  FRGoline(1,SPEED);
   delay(2000);//扫描物料颜色
   //Get_message('S');
   Mtot1.Motortot_ForwardTime(SPEED, 200);
-  Follow(); //循线到物料架中间
+  FRGoline(1,SPEED); //循线到物料架中间
 /*   wuliao_left_shang();//左移，前进，夹取上层左边物料
   wuliao_middle_shang();//前进，夹取中间左边物料
   wuliao_right_shang();//右移，前进，夹取上层右边物料 */
-  while (1);
+}
+
+void step2()//placepick
+{
+  BRGoline(3,SPEED);
+  Mtot1.Motortot_BackwardTime(SPEED,1500);
+  Mtot1.Motortot_RotLeft(SPEED);
+  FRGoline(2,SPEED);
+}
+
+void step3()//placefin
+{
+  BRGoline(3,SPEED);
+  Mtot1.Motortot_BackwardTime(SPEED,1500);
+  BRGoline(3,SPEED);
+}
+
+void step4()//retn2place1
+{
+  Mtot1.Motortot_BackwardTime(SPEED,1500);
+  BRGoline(4,SPEED);
+  Mtot1.Motortot_BackwardTime(SPEED,1500);
+  Mtot1.Motortot_RotRight(SPEED);
+  FRGoline(2,SPEED);
+  Mtot1.Motortot_RotRight(SPEED);
+  FRGoline(1,SPEED);
 }

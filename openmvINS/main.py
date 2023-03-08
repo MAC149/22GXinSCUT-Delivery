@@ -1,5 +1,5 @@
 import sensor, image, time, math,lcd
-from pyb import Pin, Timer
+from pyb import Pin, Timer , LED
 height = 120
 sensor.reset()
 sensor.set_pixformat(sensor.RGB565)
@@ -15,13 +15,21 @@ blue_block_x=3
 
 message=000
 
+led_r=LED(1)
+led_g=LED(2)
+led_b=LED(3)
+
+
 threshold_index = 0 # 0 for red, 1 for green, 2 for blue
 
 # Color Tracking Thresholds (L Min, L Max, A Min, A Max, B Min, B Max)
 # The below thresholds track in general red/green/blue things. You may wish to tune them...
-thresholds = [(30, 83, 47, 127, -128, 127), # generic_red_thresholds
-              (19, 93, -128, -26, -128, 127), # generic_green_thresholds
-              (0, 100, -20, 126, -128, -40)] # generic_blue_thresholds
+thresholds = [(36, 54, 49, 127, 7, 62), # generic_red_thresholdsup
+              (16, 49, -69, -16, -39, 41), # generic_green_thresholds
+              (11, 26, -21, 46, -45, -3),  # generic_blue_thresholds
+              (10, 45, 18, 69, -16, 39), #RD
+              (17, 46, -39, -17, 4, 27), #GD
+              (17, 29, -26, 37, -54, -3) ] #BD
 
 
 
@@ -72,7 +80,7 @@ from pyb import UART
 uart = UART(3,9600,timeout_char = 50)   # 100 可改
 
 # 串口收发数据
-recv_data = ""     # 串口接收的数据 
+recv_data = ""     # 串口接收的数据
 WL_flag = 0       # 获取上层物料放置顺序标志位
 
 
@@ -84,35 +92,41 @@ def Uart_recv():  # 串口接收数据
 
         print(recv_data)
         #uart.write(recv_data)
-        if ("CM+" in recv_data) :
+        if (recv_data!="") :
             print("Openmv has recved CMD data.")
-            if ("+ST" in recv_data):
+            if ("ST" in recv_data):
                 WL_flag = 1
                 print("Task Start!")
 
-            if ("+ED" in recv_data):
+            if ("ED" in recv_data):
                 WL_flag = 0
                 print("Task End!")
 
 
-#WL_flag = 1
+WL_flag = 1
 # 主循环
 while(True):
     clock.tick()
-    img = sensor.snapshot()
+    img = sensor.snapshot().replace(vflip=True,       #水平翻转
+                                    hmirror=True,     #镜像翻转
+                                    transpose=False)
 
     Uart_recv() # 串口接收（接收arduino发送的指令）
 
 
 
-    if(WL_flag): # 识别物料    WL_flag
+    while(WL_flag): # 识别物料    WL_flag
         #uart.write("WL_"+Pos1+Pos2+"\r\n")
-
+        led_r.on()
+        led_g.on()
+        led_b.on()
         clock.tick()
         #light = Timer(2, freq=50000).channel(1, Timer.PWM, pin=Pin("P6"))
         #light.pulse_width_percent(100) # 控制亮度 0~100
-        img = sensor.snapshot()
-        for r in img.find_blobs([thresholds[0]],roi=[0,140,320,100],pixels_threshold=200, area_threshold=200, merge=True):
+        img = sensor.snapshot().replace(vflip=True,       #水平翻转
+                                    hmirror=True,     #镜像翻转
+                                    transpose=False)
+        for r in img.find_blobs([thresholds[0]],roi=[0,48,320,120],pixels_threshold=400, area_threshold=400, merge=True):
             # These values depend on the blob not being circular - otherwise they will be shaky.
 
             # These values are stable all the time.
@@ -122,7 +136,7 @@ while(True):
             img.draw_keypoints([(r.cx(), r.cy(), int(math.degrees(r.rotation())))], size=20)
         #print(clock.fps())
             red_block_x = r.cx()
-        for g in img.find_blobs([thresholds[1]],roi=[0,140,320,100], pixels_threshold=200, area_threshold=200, merge=True):
+        for g in img.find_blobs([thresholds[1]],roi=[0,48,320,120], pixels_threshold=400, area_threshold=400, merge=True):
             # These values depend on the blob not being circular - otherwise they will be shaky.
 
             # These values are stable all the time.
@@ -133,7 +147,7 @@ while(True):
         #print(clock.fps())
             green_block_x = g.cx()
 
-        for b in img.find_blobs([thresholds[2]],roi=[0,140,320,100], pixels_threshold=200, area_threshold=200, merge=True):
+        for b in img.find_blobs([thresholds[2]],roi=[0,48,320,120], pixels_threshold=400, area_threshold=400, merge=True):
             # These values depend on the blob not being circular - otherwise they will be shaky.
 
             # These values are stable all the time.
@@ -191,7 +205,7 @@ while(True):
                 #print("%d,%d,%d,%d,%d,%d"%(int(red_block_x),int(green_block_x),int(blue_block_x),a,b,c))
                 #print(Aorder)
             if (Border==123) or (Border==132) or (Border==213) or (Border==231) or (Border==312) or (Border==321):
-                for r in img.find_blobs([thresholds[0]],roi=[0,0,320,100],pixels_threshold=200, area_threshold=200, merge=True):
+                for r in img.find_blobs([thresholds[3]],roi=[0,150,320,90],pixels_threshold=400, area_threshold=400, merge=True):
                     # These values depend on the blob not being circular - otherwise they will be shaky.
 
                     # These values are stable all the time.
@@ -202,7 +216,7 @@ while(True):
                     #print(clock.fps())
                     red_block_x = r.cx()
 
-                for g in img.find_blobs([thresholds[1]],roi=[0,0,320,100], pixels_threshold=200, area_threshold=200, merge=True):
+                for g in img.find_blobs([thresholds[4]],roi=[0,150,320,90], pixels_threshold=400, area_threshold=400, merge=True):
                     # These values depend on the blob not being circular - otherwise they will be shaky.
 
                     # These values are stable all the time.
@@ -213,7 +227,7 @@ while(True):
                     #print(clock.fps())
                     green_block_x = g.cx()
 
-                for b in img.find_blobs([thresholds[2]],roi=[0,0,320,100], pixels_threshold=200, area_threshold=200, merge=True):
+                for b in img.find_blobs([thresholds[5]],roi=[0,150,320,90], pixels_threshold=400, area_threshold=400, merge=True):
                     # These values depend on the blob not being circular - otherwise they will be shaky.
 
                     # These values are stable all the time.
@@ -269,13 +283,16 @@ while(True):
                 if int(Aorder)!= 0 and int(Border)!=0 :
                     print("OK!")
 
-                    Pos1 = str(Aorder)
-                    Pos2 = str(Border)
+                    Pos1 = str(Border)
+                    Pos2 = str(Aorder)
 
                     # 2）当物料识别成功后 【处理数据，发送数据】
                     print("WL_"+Pos1+Pos2)
-                    uart.write("WL_"+Pos1+Pos2+"\r\n")
+                    uart.write("W"+Pos1+Pos2+"b\r\n")
                     WL_flag = 0;
+                    led_r.off()
+                    led_g.off()
+                    led_b.off()
                     print("Done! ")
 
 

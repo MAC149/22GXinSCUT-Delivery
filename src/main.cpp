@@ -4,7 +4,7 @@ extern Motor MotRot,MotLift;
 extern int LeftHT[5],RightHT[5];
 extern Servo Servo_Pad,Servo_Paw;
 extern U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2;
-SoftwareSerial qrcode(10,11);
+SoftwareSerial qrcode(11,10);
 void setup()
 {
     Serial.begin(9600);
@@ -26,20 +26,17 @@ void setup()
     pinMode(A2,INPUT);
     Servo_Pad.attach(A0);
     Servo_Paw.attach(A3);
-    mpu_Init();
+    //mpu_Init();
 }
 
 void loop()
 {
-    delay(2000);
-    while(1)
-    {
-        mpu6050();
-        delay(50);
-    }
+    delay(50);
+    step1();
+    //mpuadjust(180);
     //runtest();
     //MotorTestDemo();
-    Place_P1_Red();
+    //Place_P1_Red();
     while(1);
     
 }
