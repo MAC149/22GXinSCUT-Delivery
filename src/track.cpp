@@ -4,6 +4,7 @@ unsigned int Temp[2] = { 0 };
 unsigned int Temp1[2] = { 0 };
 extern Motortot Mtot1;
 extern Motor MotRot,MotLift;
+extern int LeftHT[5],RightHT[5];
 bool Break_Flag = 0;
 bool LinePassBreak=0;
 int line=0,check=0;
